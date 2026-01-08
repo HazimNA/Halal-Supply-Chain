@@ -1,0 +1,34 @@
+:root {
+  --primary-green: #4caf50;
+  --primary-glow: rgba(76, 175, 80, 0.4);
+  --dark-bg: #0b0f1a;
+  --text-main: #ffffff;
+  --text-dim: #94a3b8;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--dark-bg);
+  /* Creates a subtle glow in the top-right corner */
+  background-image: radial-gradient(circle at top right, #1e293b, #0b0f1a);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center;     /* Center vertically */
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

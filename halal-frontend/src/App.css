@@ -1,0 +1,232 @@
+/* --- THEME VARIABLES --- */
+:root {
+  --primary-green: #4caf50;
+  --primary-glow: rgba(76, 175, 80, 0.4);
+  --dark-bg: #0b0f1a;
+  --card-bg: rgba(30, 41, 59, 0.4);
+  --text-main: #ffffff;
+  --text-dim: #94a3b8;
+  --error-red: #ef4444;
+}
+
+/* --- BASE STYLES --- */
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--dark-bg);
+  background-image: radial-gradient(circle at top right, #1e293b, #0b0f1a);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+/* --- GLASSMORPHISM CARD (Enlarged Version) --- */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 2px solid var(--primary-green);
+  border-radius: 24px;
+  padding: 4rem 3rem;
+  
+  /* Width adjusted to match your reference image */
+  width: 90%;
+  max-width: 1000px; 
+  
+  text-align: center;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(76, 175, 80, 0.1);
+  animation: fadeIn 0.6s ease-out;
+  margin: 40px auto;
+}
+
+/* Page specific expansion for complex dashboards */
+.glass-card.wide {
+  max-width: 1100px; 
+}
+
+/* --- TYPOGRAPHY --- */
+.card-title {
+  color: var(--primary-green);
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+}
+
+.card-subtitle {
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+}
+
+/* --- FORM & LAYOUT --- */
+/* Keeps buttons and inputs centered and appropriately sized within the wide card */
+.action-stack, .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 550px; 
+  margin: 0 auto;
+}
+
+.input-label {
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin-bottom: -12px;
+  font-weight: 600;
+}
+
+.glass-input {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+  border-color: var(--primary-green);
+  background: rgba(15, 23, 42, 1);
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+}
+
+select.glass-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1.2rem center;
+  background-size: 1.1em;
+}
+
+/* --- BUTTONS --- */
+.primary-btn {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.primary-btn:hover {
+  box-shadow: 0 0 25px var(--primary-glow);
+  transform: translateY(-3px);
+  filter: brightness(1.1);
+}
+
+.secondary-btn {
+  background: transparent;
+  border: 1px solid var(--text-dim);
+  color: var(--text-dim);
+  padding: 16px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.secondary-btn:hover {
+  border-color: white;
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.logout-btn {
+  margin-top: 40px;
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--error-red);
+  font-size: 0.9rem;
+  padding: 12px 30px;
+  width: fit-content;
+  align-self: center;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--error-red);
+}
+
+/* --- PUBLIC SCANNER & STATUS --- */
+.scanner-box {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 25px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid var(--primary-green);
+  background: #000;
+}
+
+.status-card {
+  margin-top: 25px;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border-left: 5px solid var(--primary-green);
+  text-align: left;
+  max-width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.result-header {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--primary-green);
+  margin-bottom: 12px;
+}
+
+.cert-link {
+  color: #81c784;
+  text-decoration: underline;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 15px;
+}
+
+/* --- FOOTER STATUS --- */
+.status-footer {
+  margin-top: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: var(--primary-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--primary-green);
+}
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 900px) {
+  .glass-card {
+    width: 95%;
+    padding: 2.5rem 1.5rem;
+  }
+  .card-title {
+    font-size: 2.2rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
