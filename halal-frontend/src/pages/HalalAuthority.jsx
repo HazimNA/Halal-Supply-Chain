@@ -1,75 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connectBlockchain } from "../blockchain/shared";
 
-export default function Authority() {
+export default function HalalAuthority({ logout }) {
   const [batchId, setBatchId] = useState("");
+  const [productPreview, setProductPreview] = useState("");
   const [ipfsHash, setIpfsHash] = useState("");
-  const [isHalal, setIsHalal] = useState(true); // Default to true
   const [status, setStatus] = useState("");
 
-  const handleIssueCertificate = async () => {
+  // Auto-fetch product name when Global ID is entered
+  useEffect(() => {
+    const fetchPreview = async () => {
+      if (!batchId || isNaN(batchId)) {
+        setProductPreview("");
+        return;
+      }
+      try {
+        const { contract } = await connectBlockchain();
+        const batch = await contract.getBatch(batchId);
+        // Combine Name and NameCount for the Authority's reference
+        setProductPreview(`${batch.name}_${batch.nameCount.toString()}`);
+      } catch (err) {
+        setProductPreview("Invalid ID");
+      }
+    };
+    fetchPreview();
+  }, [batchId]);
+
+  const certify = async (isHalal) => {
     if (!batchId || !ipfsHash) return alert("Please fill in all fields");
     
-    setStatus("Updating Blockchain...");
+    setStatus("Signing Certificate...");
     try {
       const { contract } = await connectBlockchain();
       
-      // Calls the setHalalCertificate function in your Solidity contract
-      // Parameters: (uint256 batchId, string memory certificateHash, bool isHalal)
+      // Use the Global Batch ID (number) for the contract call
       const tx = await contract.setHalalCertificate(batchId, ipfsHash, isHalal);
-      
       await tx.wait();
-      setStatus(`Success! Batch #${batchId} is now ${isHalal ? 'Certified' : 'Rejected'}.`);
       
-      // Clear inputs for next entry
+      setStatus(`Success: ${productPreview} is now ${isHalal ? 'Certified Halal' : 'Rejected'}.`);
       setBatchId("");
       setIpfsHash("");
-    } catch (error) {
-      console.error(error);
-      setStatus("Error: Transaction failed. Ensure you have the 'Authority' role.");
+    } catch (err) {
+      console.error(err);
+      setStatus("Error: Transaction failed. Ensure the batch is in 'Pending' status.");
     }
   };
 
   return (
-    <div className="login-container admin-card">
-      <h1 className="login-title">Halal Authority</h1>
-      <p className="login-subtitle">Issue Digital Certification</p>
+    <div className="glass-card wide">
+      <h1 className="card-title">Halal Authority Portal</h1>
+      <p className="card-subtitle">Verify and Certify Product Batches</p>
 
-      <div className="admin-form">
-        <label className="input-label">Batch ID</label>
+      <div className="form-group">
+        <label className="input-label">Enter Global Batch ID (#)</label>
         <input 
+          className="glass-input" 
           type="number" 
-          className="admin-input" 
-          placeholder="Enter Batch ID (e.g. 1)" 
-          value={batchId}
-          onChange={(e) => setBatchId(e.target.value)}
+          placeholder="e.g. 1" 
+          value={batchId} 
+          onChange={(e) => setBatchId(e.target.value)} 
         />
+        
+        {/* Verification Preview */}
+        {productPreview && (
+          <div style={{ marginTop: '10px', fontSize: '0.9rem', color: productPreview === "Invalid ID" ? "#ef4444" : "#2196f3" }}>
+            <strong>Target Product:</strong> {productPreview}
+          </div>
+        )}
 
-        <label className="input-label">IPFS Certificate Hash</label>
+        <label className="input-label" style={{ marginTop: '20px' }}>IPFS Certificate Hash</label>
         <input 
-          type="text" 
-          className="admin-input" 
-          placeholder="Paste Hash (Qm...)" 
-          value={ipfsHash}
-          onChange={(e) => setIpfsHash(e.target.value)}
+          className="glass-input" 
+          placeholder="Qm..." 
+          value={ipfsHash} 
+          onChange={(e) => setIpfsHash(e.target.value)} 
         />
 
-        <label className="input-label">Verification Result</label>
-        <select 
-          className="admin-input" 
-          value={isHalal} 
-          onChange={(e) => setIsHalal(e.target.value === "true")}
-        >
-          <option value="true">✅ Halal Certified</option>
-          <option value="false">❌ Non-Halal / Rejected</option>
-        </select>
-
-        <button className="login-button" onClick={handleIssueCertificate}>
-          Sign & Issue Certificate
-        </button>
+        <div style={{ display: 'flex', gap: '15px', marginTop: '25px' }}>
+          <button className="primary-btn" onClick={() => certify(true)} style={{ flex: 1 }}>
+            Approve Halal
+          </button>
+          <button className="primary-btn" onClick={() => certify(false)} style={{ flex: 1, backgroundColor: '#ef4444' }}>
+            Reject Batch
+          </button>
+        </div>
       </div>
 
-      {status && <p className="status-text">{status}</p>}
+      {status && <p className="status-text" style={{ marginTop: '20px' }}>{status}</p>}
+
+      <button className="secondary-btn logout-btn" onClick={logout} style={{ marginTop: '30px' }}>
+        Logout
+      </button>
     </div>
   );
 }

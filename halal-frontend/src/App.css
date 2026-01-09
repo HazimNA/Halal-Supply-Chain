@@ -158,6 +158,29 @@ select.glass-input {
   border-color: var(--error-red);
 }
 
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.inventory-table th {
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding: 10px;
+  color: #94a3b8;
+}
+
+.inventory-table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.status-2 { color: #4caf50; font-weight: bold; } /* Halal */
+.status-1 { color: #ff9800; } /* Pending *
+
 /* --- PUBLIC SCANNER & STATUS --- */
 .scanner-box {
   width: 100%;
