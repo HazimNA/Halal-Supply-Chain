@@ -65,8 +65,9 @@ export default function Producer({ logout }) {
     setStatus("Registering on blockchain...");
     
     try {
-      const { contract } = await connectBlockchain();
-      const tx = await contract.createBatch(name);
+      const { contractWithSigner, contract } = await connectBlockchain();
+      const writeContract = contractWithSigner ?? (contract.connect ? contract.connect(await (await contract.provider).getSigner()) : contract);
+      const tx = await writeContract.createBatch(name);
       const receipt = await tx.wait(); 
 
       const logs = receipt.events || receipt.logs; 
@@ -95,13 +96,47 @@ export default function Producer({ logout }) {
   // 3. TRANSFER BATCH
   const handleTransfer = async () => {
     try {
-      const { contract } = await connectBlockchain();
-      const tx = await contract.transferBatchOwnership(transferBatchId, targetOwner);
-      await tx.wait();
-      setStatus("Transfer Successful!");
-      loadInventory(); // Refresh table
-    } catch (err) { setStatus("Transfer failed. Check status/role."); }
-  };
+      // Basic input validation
+      const id = parseInt(transferBatchId, 10);
+      if (!transferBatchId || isNaN(id) || id <= 0) {
+        setStatus('Invalid Global ID');
+        return;
+      }
+      const isAddress = /^0x[a-fA-F0-9]{40}$/.test(targetOwner);
+      if (!isAddress) {
+        setStatus('Invalid target address');
+        return;
+      }
+
+      const { contractWithSigner, contract } = await connectBlockchain();
+      const writeContract = contractWithSigner ?? (contract.connect ? contract.connect(await (await contract.provider).getSigner()) : contract);
+
+      // Pre-check that the batch exists (avoids sending a tx that will revert)
+      try {
+        await contract.getBatch(id);
+      } catch (readErr) {
+        setStatus('Batch does not exist');
+        return;
+      }
+
+      const tx = await writeContract.transferBatchOwnership(id, targetOwner);
+      await tx.wait(); // Wait for the block to be mined
+
+      setStatus('Transfer Successful!');
+
+      // Refresh the table immediately
+      await loadInventory();
+
+      // Clear the input fields
+      setTransferBatchId('');
+      setTargetOwner('');
+    } catch (err) {
+      console.error('Transfer Error:', err);
+      // Show more informative message when available
+      const msg = err?.data?.message || err?.message || 'Transfer failed. Check status/role.';
+      setStatus(msg);
+    }
+};
 
   const statusLabels = ["Created", "Pending", "Halal", "Not Halal", "In Transit", "Retail", "Sold"];
 

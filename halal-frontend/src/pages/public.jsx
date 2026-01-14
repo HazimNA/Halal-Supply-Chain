@@ -19,38 +19,35 @@ export default function Public({ logout }) {
   ];
 
   const handleManualSearch = async () => {
-    if (!searchInput.includes("_")) {
-      return alert("Please use the format: Product_ID (e.g., Wagyu_1)");
+  if (!searchInput.includes("_")) {
+    return alert("Format must be Name_Count (e.g., Wagyu_1)");
+  }
+
+  setLoading(true);
+  try {
+    const contract = await getGuestContract();
+    const [targetName, targetCount] = searchInput.split("_");
+
+    // 1. Get the Global ID using your public mapping
+    // mapping(string => mapping(uint256 => uint256)) public nameAndCountToId;
+    const globalId = await contract.nameAndCountToId(targetName, parseInt(targetCount));
+
+    if (globalId.toString() === "0") {
+      alert("This batch does not exist.");
+      setLoading(false);
+      return;
     }
 
-    setLoading(true);
-    try {
-      const contract = await getGuestContract(); // Connects via RPC
-      const [targetName, targetCount] = searchInput.split("_");
-      
-      const totalBatches = await contract.batchCount();
-      let foundBatch = null;
+    // 2. Get the full Batch details
+    const batchData = await contract.getBatch(globalId);
+    setResult(batchData);
 
-      // Search logic for per-name incrementing batches
-      for (let i = 1; i <= totalBatches; i++) {
-        const batch = await contract.getBatch(i);
-        if (
-          batch.name.toLowerCase() === targetName.toLowerCase() &&
-          batch.nameCount.toString() === targetCount
-        ) {
-          foundBatch = batch;
-          break;
-        }
-      }
-
-      if (foundBatch) setResult(foundBatch);
-      else alert("Product batch not found.");
-      
-    } catch (err) {
-      alert("Error accessing blockchain node.");
-    }
-    setLoading(false);
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Error fetching batch. Make sure the ID is correct.");
+  }
+  setLoading(false);
+};
 
   useEffect(() => {
     const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -100,38 +97,36 @@ export default function Public({ logout }) {
       {/* QR SCANNER SECTION */}
       <div id="reader" className="scanner-box"></div>
 
-      {/* VERIFICATION RESULT VISUAL */}
       {result && (
-        <div className="status-card" style={{ animation: 'fadeIn 0.5s ease' }}>
-          <div className="result-header" style={{ color: result.status === 2 ? '#4caf50' : '#ff9800' }}>
-            {result.status === 2 ? "✅ CERTIFIED HALAL" : "🔎 STATUS: " + statusLabels[result.status]}
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '15px', fontSize: '0.9rem' }}>
-            <div>
-              <span style={{ color: '#94a3b8', display: 'block' }}>Product Name</span>
-              <strong>{result.name}_{result.nameCount.toString()}</strong>
-            </div>
-            <div>
-              <span style={{ color: '#94a3b8', display: 'block' }}>Blockchain ID</span>
-              <strong>#{result.id.toString()}</strong>
-            </div>
-          </div>
+  <div className="verification-result">
+    {/* Highlight Halal Status */}
+    <div className={`status-banner ${result.status === 2 ? 'halal-success' : 'pending'}`}>
+      {result.status === 2 ? "🌿 SHARIAH COMPLIANT / HALAL CERTIFIED" : "🔎 Status: " + statusLabels[result.status]}
+    </div>
 
-          {result.certificateHash && (
-            <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-              <a 
-                href={`https://gateway.pinata.cloud/ipfs/${result.certificateHash}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="cert-link"
-              >
-                📜 View Digital Halal Certificate (IPFS)
-              </a>
-            </div>
-          )}
-        </div>
-      )}
+    <div className="details-grid">
+      <p><strong>Producer:</strong> {result.producer}</p>
+      <p><strong>Batch Reference:</strong> {result.name}_{result.nameCount.toString()}</p>
+    </div>
+
+    {/* The most important part for the public: The Certificate */}
+    {result.certificateHash ? (
+      <div className="cert-box">
+        <p>Verification fingerprint found on blockchain:</p>
+        <code>{result.certificateHash}</code>
+        <a 
+          href={`https://ipfs.io/ipfs/${result.certificateHash}`} 
+          target="_blank" 
+          className="view-cert-btn"
+        >
+          View JAKIM/Authority Certificate
+        </a>
+      </div>
+    ) : (
+      <p className="warning">⚠️ No digital certificate has been uploaded yet.</p>
+    )}
+  </div>
+)}
 
       <button className="secondary-btn logout-btn" onClick={logout}>
         Return to Login

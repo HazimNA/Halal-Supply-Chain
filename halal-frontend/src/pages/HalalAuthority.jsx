@@ -31,18 +31,20 @@ export default function HalalAuthority({ logout }) {
     
     setStatus("Signing Certificate...");
     try {
-      const { contract } = await connectBlockchain();
-      
+      const { contractWithSigner, contract } = await connectBlockchain();
+      const writeContract = contractWithSigner ?? (contract.connect ? contract.connect(await (await contract.provider).getSigner()) : contract);
+
       // Use the Global Batch ID (number) for the contract call
-      const tx = await contract.setHalalCertificate(batchId, ipfsHash, isHalal);
+      const tx = await writeContract.setHalalCertificate(parseInt(batchId, 10), ipfsHash, isHalal);
       await tx.wait();
       
       setStatus(`Success: ${productPreview} is now ${isHalal ? 'Certified Halal' : 'Rejected'}.`);
       setBatchId("");
       setIpfsHash("");
     } catch (err) {
-      console.error(err);
-      setStatus("Error: Transaction failed. Ensure the batch is in 'Pending' status.");
+      console.error('Certify Error:', err);
+      const msg = err?.data?.message || err?.message || "Error: Transaction failed. Ensure the batch is in 'Pending' status.";
+      setStatus(msg);
     }
   };
 

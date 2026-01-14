@@ -63,14 +63,50 @@ body {
 }
 
 /* --- FORM & LAYOUT --- */
-/* Keeps buttons and inputs centered and appropriately sized within the wide card */
-.action-stack, .form-group {
+/* Keeps inputs centered and appropriately sized within the wide card */
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 100%;
   max-width: 550px; 
   margin: 0 auto;
+}
+
+/* Action stack displays rows of paired grant/revoke buttons */
+.action-stack {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  justify-content: center;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.role-pair {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.revoke-btn {
+  background: var(--error-red);
+  color: white;
+  border: none;
+  padding: 14px 18px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 1.0rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.revoke-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.95);
+  box-shadow: 0 0 12px rgba(239,68,68,0.25);
 }
 
 .input-label {

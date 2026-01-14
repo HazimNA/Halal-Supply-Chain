@@ -38,17 +38,19 @@ export default function Slaughterhouse({ logout }) {
     setStatus("Recording processing details...");
 
     try {
-      const { contract } = await connectBlockchain();
-      
+      const { contractWithSigner, contract } = await connectBlockchain();
+      const writeContract = contractWithSigner ?? (contract.connect ? contract.connect(await (await contract.provider).getSigner()) : contract);
+
       // Calls recordSlaughter (moves status from Created to PendingCertification)
-      const tx = await contract.recordSlaughter(batchId, true);
+      const tx = await writeContract.recordSlaughter(parseInt(batchId, 10), true);
       await tx.wait();
-      
+
       setStatus(`Success: ${productPreview} processed. Now awaiting Halal Authority.`);
       setBatchId("");
     } catch (err) {
-      console.error(err);
-      setStatus("Error: Ensure ID is correct and batch is in 'Created' status.");
+      console.error('Record Error:', err);
+      const msg = err?.data?.message || err?.message || "Error: Ensure ID is correct and batch is in 'Created' status.";
+      setStatus(msg);
     } finally {
       setLoading(false);
     }

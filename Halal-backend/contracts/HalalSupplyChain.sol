@@ -15,7 +15,8 @@ contract HalalSupplyChain {
     struct Batch {
         uint256 id;
         string name;
-        uint256 nameCount; 
+        uint256 nameCount;
+        address producer;
         address currentOwner;
         BatchStatus status;
         string certificateHash;
@@ -42,6 +43,7 @@ contract HalalSupplyChain {
     mapping(uint256 => CertificateRecord[]) private _certificateHistory;
 
     event RoleGranted(address indexed account, string role);
+    event RoleRevoked(address indexed account, string role);
     event BatchCreated(uint256 batchId, string name, uint256 count, address producer);
     event HalalCertificateSet(uint256 batchId, string certificateHash, bool isHalal);
     event BatchStatusUpdated(uint256 batchId, BatchStatus newStatus);
@@ -83,6 +85,12 @@ contract HalalSupplyChain {
     function grantHalalAuthorityRole(address account) public onlyAdmin { isHalalAuthority[account] = true; emit RoleGranted(account, "Halal Authority"); }
     function grantSlaughterhouseRole(address account) public onlyAdmin { isSlaughterhouse[account] = true; emit RoleGranted(account, "Slaughterhouse"); }
 
+    function revokeProducerRole(address account) public onlyAdmin { isProducer[account] = false; emit RoleRevoked(account, "Producer"); }
+    function revokeDistributorRole(address account) public onlyAdmin { isDistributor[account] = false; emit RoleRevoked(account, "Distributor"); }
+    function revokeRetailerRole(address account) public onlyAdmin { isRetailer[account] = false; emit RoleRevoked(account, "Retailer"); }
+    function revokeHalalAuthorityRole(address account) public onlyAdmin { isHalalAuthority[account] = false; emit RoleRevoked(account, "Halal Authority"); }
+    function revokeSlaughterhouseRole(address account) public onlyAdmin { isSlaughterhouse[account] = false; emit RoleRevoked(account, "Slaughterhouse"); }
+
     // --- Core Batch Functions ---
 
     function createBatch(string memory name) public onlyProducer returns (uint256) {
@@ -96,6 +104,7 @@ contract HalalSupplyChain {
             id: batchId,
             name: name,
             nameCount: currentCount,
+            producer: msg.sender,
             currentOwner: msg.sender,
             status: BatchStatus.Created,
             certificateHash: ""
@@ -146,6 +155,26 @@ contract HalalSupplyChain {
         _statusHistory[batchId].push(StatusChange({newStatus: batch.status, changedAt: block.timestamp}));
         
         emit OwnershipTransferred(batchId, oldOwner, newOwner);
+        emit BatchStatusUpdated(batchId, batch.status);
+    }
+
+    /**
+     * Retailer can mark a batch as Sold. This sets owner to the zero address
+     * and updates the status to `Sold`.
+     */
+    function markAsSold(uint256 batchId) public onlyRetailer {
+        Batch storage batch = _batches[batchId];
+        require(batch.currentOwner == msg.sender, "Only current owner can mark as sold");
+        require(_isValidStatusTransition(batch.status, BatchStatus.Sold), "Invalid status move");
+
+        address oldOwner = batch.currentOwner;
+        batch.currentOwner = address(0);
+        batch.status = BatchStatus.Sold;
+
+        _transferHistory[batchId].push(TransferRecord({from: oldOwner, to: address(0), transferredAt: block.timestamp}));
+        _statusHistory[batchId].push(StatusChange({newStatus: batch.status, changedAt: block.timestamp}));
+
+        emit OwnershipTransferred(batchId, oldOwner, address(0));
         emit BatchStatusUpdated(batchId, batch.status);
     }
 

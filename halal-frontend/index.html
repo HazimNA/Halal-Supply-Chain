@@ -5,6 +5,15 @@
     <link rel="icon" type="Haqazan" href="/Haqazan.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Halal Supply Chain dApp</title>
+    <script>
+      // This script sets the Content Security Policy for the application
+      (function() {
+        var meta = document.createElement('meta');
+        meta.httpEquiv = 'Content-Security-Policy';
+        meta.content = "script-src 'self' 'unsafe-eval' 'unsafe-inline'; object-src 'none'";
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
