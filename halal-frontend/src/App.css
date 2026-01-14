@@ -163,20 +163,21 @@ select.glass-input {
 }
 
 .secondary-btn {
-  background: transparent;
-  border: 1px solid var(--text-dim);
-  color: var(--text-dim);
-  padding: 16px;
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 18px;
   border-radius: 50px;
-  font-weight: 600;
+  font-weight: 800;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .secondary-btn:hover {
-  border-color: white;
-  color: white;
-  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 25px var(--primary-glow);
+  transform: translateY(-3px);
+  filter: brightness(1.1);
 }
 
 .logout-btn {
