@@ -4,7 +4,9 @@ import { HalalSupplyChainABI } from "../abi/HalalSupplyChainABI.js";
 // The ABI file exports an artifact-like object with an `abi` property.
 const CONTRACT_ABI = HalalSupplyChainABI?.abi ?? HalalSupplyChainABI;
 
-export const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+// ✅ Use env contract address so you can switch networks easily
+export const CONTRACT_ADDRESS =
+  import.meta?.env?.VITE_CONTRACT_ADDRESS || "0x119Bf97AEc8f72Df116f6288e9c6f23Dd55e619f";
 
 /** Choose a browser/provider compatible with ethers v5 or v6 */
 function makeBrowserProvider() {
@@ -18,7 +20,7 @@ function makeBrowserProvider() {
 }
 
 /** Choose a JSON-RPC provider for guest mode (v5/v6) */
-function makeJsonRpcProvider(rpc = "http://127.0.0.1:8545") {
+function makeJsonRpcProvider(rpc) {
   if (typeof ethers.JsonRpcProvider !== "undefined") {
     return new ethers.JsonRpcProvider(rpc); // v6
   }
@@ -49,14 +51,14 @@ export const connectBlockchain = async () => {
 
     const provider = makeBrowserProvider();
 
-  // AWAIT the signer here!
-  const signer = await provider.getSigner(); 
+    // AWAIT the signer here!
+    const signer = await provider.getSigner();
 
-  // Connect the contract to the resolved signer
-  const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-  const contractWithSigner = contract.connect(signer);
+    // Read contract with provider, write with signer
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+    const contractWithSigner = contract.connect(signer);
 
-  return { contract, signer, contractWithSigner, address: accounts[0] };
+    return { contract, signer, contractWithSigner, address: accounts[0] };
   } catch (err) {
     console.error("Blockchain Connection Error:", err);
 
@@ -67,19 +69,28 @@ export const connectBlockchain = async () => {
     } else if (err && /no accounts/i.test(String(err.message || err))) {
       alert("No unlocked accounts found. Please unlock MetaMask.");
     } else {
-      alert("Error accessing blockchain. Is your Hardhat node running?");
+      alert("Error accessing blockchain. Check MetaMask network and RPC.");
     }
 
     throw err;
   }
 };
 
+// ✅ FIXED: Guest uses Sepolia HTTPS RPC (not localhost)
 export async function getGuestContract() {
   try {
-    const provider = makeJsonRpcProvider("http://127.0.0.1:8545");
+    const RPC_URL =
+      import.meta?.env?.VITE_SEPOLIA_RPC_URL || "https://ethereum-sepolia.publicnode.com";
+
+    const provider = makeJsonRpcProvider(RPC_URL);
+
+    // quick sanity check (optional but helps detect RPC issues)
+    await provider.getBlockNumber();
+
     return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
   } catch (err) {
     console.error("Guest mode failed:", err);
-    return null;
+    throw err; // better to throw so Public page can show proper error
   }
 }
+  

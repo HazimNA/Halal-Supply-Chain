@@ -1,13 +1,37 @@
-# Sample Hardhat Project
+# Halal Supply Chain Backend
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+This is the backend for the Halal Supply Chain project, built with Hardhat.
 
-Try running some of the following tasks:
+## Setup
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Create a `.env` file with your Sepolia configuration:
+   ```
+   SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID
+   PRIVATE_KEY=YOUR_PRIVATE_KEY_HERE
+   ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
+   ```
+
+## Deployment
+
+### Local Development
+```bash
 npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.js
+npx hardhat run scripts/deploy.js
+```
+
+### Sepolia Testnet
+```bash
+npx hardhat run scripts/deploy.js --network sepolia
+```
+
+After deployment, note the contract address and update it in the frontend's `shared.js` file.
+
+## Testing
+```bash
+npx hardhat test
 ```
