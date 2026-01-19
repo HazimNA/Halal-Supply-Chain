@@ -6,6 +6,7 @@ A blockchain-based system for tracking halal supply chains using Ethereum smart 
 
 - `Halal-backend/`: Smart contract development with Hardhat
 - `halal-frontend/`: React frontend for interacting with the contracts
+- 'backend-ipfs/': ipfs storage for Halal Certificate
 
 ## Deployment to Sepolia
 
