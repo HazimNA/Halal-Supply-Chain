@@ -23,6 +23,11 @@ A blockchain-based system for tracking halal supply chains using Ethereum smart 
    - Ensure MetaMask is connected to Sepolia testnet
    - Start: `npm run dev`
 
+3. **ipfs Setup:**
+   - Navigate to `backend-ipfs/`
+   - Install dependencies: `npm install`
+   - Start: `npm run start`
+   
 ## Requirements
 
 - Node.js
